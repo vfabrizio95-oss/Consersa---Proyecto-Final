@@ -15,6 +15,16 @@ resource "aws_cloudwatch_event_rule" "orden_recibida" {
   })
 }
 
+resource "aws_cloudwatch_event_target" "orden_recibida_sqs" {
+  rule           = aws_cloudwatch_event_rule.orden_recibida.name
+  event_bus_name = aws_cloudwatch_event_bus.main.name
+  arn            = aws_sqs_queue.ordenes.arn
+  target_id      = "SQS_Ordenes"
+  sqs_target {
+    message_group_id = "default"
+    }
+}
+
 resource "aws_cloudwatch_event_rule" "orden_eliminada" {
   name           = "${local.prefix}-orden-eliminada"
   event_bus_name = aws_cloudwatch_event_bus.main.name
@@ -25,6 +35,16 @@ resource "aws_cloudwatch_event_rule" "orden_eliminada" {
   })
 }
 
+resource "aws_cloudwatch_event_target" "orden_eliminada_sqs" {
+  rule           = aws_cloudwatch_event_rule.orden_eliminada.name
+  event_bus_name = aws_cloudwatch_event_bus.main.name
+  arn            = aws_sqs_queue.ordenes.arn
+  target_id      = "SQS_ordenes_eliminadas"
+  sqs_target {
+    message_group_id = "default"
+    }
+}
+
 resource "aws_cloudwatch_event_rule" "valorizacion_creada" {
   name           = "${local.prefix}-valorizacion-creada"
   event_bus_name = aws_cloudwatch_event_bus.main.name
@@ -33,6 +53,16 @@ resource "aws_cloudwatch_event_rule" "valorizacion_creada" {
     source      = ["Concersa.valorizacion"]
     detail-type = ["Valorizacion Creada"]
   })
+}
+
+resource "aws_cloudwatch_event_target" "valorizacion_sqs" {
+  rule           = aws_cloudwatch_event_rule.valorizacion_creada.name
+  event_bus_name = aws_cloudwatch_event_bus.main.name
+  arn            = aws_sqs_queue.valorizaciones.arn
+  target_id      = "SQS_valorizaciones"
+  sqs_target {
+    message_group_id = "default"
+    }
 }
 
 resource "aws_cloudwatch_event_bus_policy" "allow_account" {
