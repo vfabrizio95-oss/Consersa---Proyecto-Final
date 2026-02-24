@@ -139,6 +139,8 @@ resource "aws_api_gateway_stage" "main" {
   deployment_id         = aws_api_gateway_deployment.main.id
   rest_api_id           = aws_api_gateway_rest_api.main.id
   stage_name            = var.environment
+  cache_cluster_enabled = true
+  cache_cluster_size    = "0.5"
 
   access_log_settings {
     destination_arn = aws_cloudwatch_log_group.api.arn
