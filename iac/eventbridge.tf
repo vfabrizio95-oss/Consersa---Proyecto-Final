@@ -15,6 +15,16 @@ resource "aws_cloudwatch_event_rule" "orden_recibida" {
   })
 }
 
+resource "aws_cloudwatch_event_rule" "orden_eliminada" {
+  name           = "${local.prefix}-orden-eliminada"
+  event_bus_name = aws_cloudwatch_event_bus.main.name
+
+  event_pattern = jsonencode({
+    source      = ["Consersa.orders"]
+    detail-type = ["Order Eliminada"]
+  })
+}
+
 resource "aws_cloudwatch_event_rule" "valorizacion_creada" {
   name           = "${local.prefix}-valorizacion-creada"
   event_bus_name = aws_cloudwatch_event_bus.main.name
