@@ -15,6 +15,16 @@ resource "aws_cloudwatch_event_rule" "orden_recibida" {
   })
 }
 
+resource "aws_cloudwatch_event_rule" "valorizacion_creada" {
+  name           = "${local.prefix}-valorizacion-creada"
+  event_bus_name = aws_cloudwatch_event_bus.main.name
+
+  event_pattern = jsonencode({
+    source      = ["Concersa.valorizacion"]
+    detail-type = ["Valorizacion Creada"]
+  })
+}
+
 resource "aws_cloudwatch_event_bus_policy" "allow_account" {
   event_bus_name = aws_cloudwatch_event_bus.main.name
   policy = jsonencode({
