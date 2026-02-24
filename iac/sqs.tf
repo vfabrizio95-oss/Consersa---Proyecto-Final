@@ -54,6 +54,33 @@ resource "aws_sqs_queue" "ordenes_dlq" {
   }
 }
 
+resource "aws_sns_topic" "notificaciones" {
+  name              = "${local.prefix}-notificaciones"
+  kms_master_key_id = aws_kms_key.main.id
+
+  tags = {
+    Name = "${local.prefix}-sns-notificaciones"
+  }
+}
+
+resource "aws_sns_topic" "valorizacion_terminada" {
+  name                        = "${local.prefix}-valorizacion-terminada.fifo"
+  fifo_topic                  = true
+  content_based_deduplication = true
+  kms_master_key_id           = aws_kms_key.main.id
+
+  tags = {
+    Name = "${local.prefix}-sns-valorizacion"
+  }
+}
+
+resource "aws_sns_topic_subscription" "valorizacion_a_sqs" {
+  topic_arn            = aws_sns_topic.valorizacion_terminada.arn
+  protocol             = "sqs"
+  endpoint             = aws_sqs_queue.valorizaciones.arn
+  raw_message_delivery = true
+}
+
 resource "aws_sqs_queue_policy" "valorizaciones_policy" {
   queue_url = aws_sqs_queue.valorizaciones.url
 

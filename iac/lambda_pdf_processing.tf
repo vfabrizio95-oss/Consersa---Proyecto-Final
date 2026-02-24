@@ -1,0 +1,31 @@
+resource "aws_lambda_function" "pdf_processing" {
+  filename         = data.archive_file.placeholder.output_path
+  function_name    = "${local.prefix}-pdf-processing"
+  role             = aws_iam_role.lambda.arn
+  handler          = "index.handler"
+  runtime          = "nodejs20.x"
+  timeout          = 120
+  memory_size      = 1024
+  source_code_hash = data.archive_file.placeholder.output_base64sha256
+
+  vpc_config {
+    subnet_ids         = aws_subnet.private[*].id
+    security_group_ids = [aws_security_group.lambda_sg.id]
+  }
+
+  tracing_config {
+    mode = "Active"
+  }
+
+  environment {
+    variables = {
+      PDF_BUCKET                 = aws_s3_bucket.pdfs.bucket
+      TABLE_INFORMACION_ORIGINAL = aws_dynamodb_table.informacion_original.name
+      TABLE_INFORMACION_GUARDADA = aws_dynamodb_table.informacion_guardada.name
+    }
+  }
+
+  ephemeral_storage {
+    size = 1024
+  }
+}
