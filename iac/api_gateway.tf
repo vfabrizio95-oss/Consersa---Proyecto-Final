@@ -139,4 +139,40 @@ resource "aws_api_gateway_stage" "main" {
   deployment_id         = aws_api_gateway_deployment.main.id
   rest_api_id           = aws_api_gateway_rest_api.main.id
   stage_name            = var.environment
+
+  access_log_settings {
+    destination_arn = aws_cloudwatch_log_group.api.arn
+    format = jsonencode({
+      requestId      = "$context.requestId"
+      ip             = "$context.identity.sourceIp"
+      caller         = "$context.identity.caller"
+      user           = "$context.identity.user"
+      requestTime    = "$context.requestTime"
+      httpMethod     = "$context.httpMethod"
+      resourcePath   = "$context.resourcePath"
+      status         = "$context.status"
+      protocol       = "$context.protocol"
+      responseLength = "$context.responseLength"
+    })
+  }
+  xray_tracing_enabled = true
+
+  depends_on = [
+    aws_api_gateway_account.main
+    ]
+}
+
+resource "aws_api_gateway_method_settings" "main" {
+  rest_api_id = aws_api_gateway_rest_api.main.id
+  stage_name  = aws_api_gateway_stage.main.stage_name
+  method_path = "*/*"
+
+  settings {
+    caching_enabled      = true
+    cache_data_encrypted   = true
+    cache_ttl_in_seconds = 300
+    data_trace_enabled     = false
+    logging_level          = "INFO"
+    metrics_enabled        = true
+  }
 }
