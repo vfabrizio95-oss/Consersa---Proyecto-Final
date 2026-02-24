@@ -77,6 +77,23 @@ resource "aws_api_gateway_integration" "post_orden" {
   uri                     = aws_lambda_function.orden_recibida.invoke_arn
 }
 
+resource "aws_api_gateway_method" "delete_orden" {
+  rest_api_id   = aws_api_gateway_rest_api.main.id
+  resource_id   = aws_api_gateway_resource.orden_id.id
+  http_method   = "DELETE"
+  authorization = "COGNITO_USER_POOLS"
+  authorizer_id = aws_api_gateway_authorizer.cognito.id
+}
+
+resource "aws_api_gateway_integration" "delete_orden" {
+  rest_api_id             = aws_api_gateway_rest_api.main.id
+  resource_id             = aws_api_gateway_resource.orden_id.id
+  http_method             = aws_api_gateway_method.delete_orden.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = aws_lambda_function.orden_eliminada.invoke_arn
+}
+
 resource "aws_api_gateway_method" "get_orden" {
   rest_api_id   = aws_api_gateway_rest_api.main.id
   resource_id   = aws_api_gateway_resource.orden_id.id
@@ -101,6 +118,7 @@ resource "aws_api_gateway_deployment" "main" {
     redeploy = sha1(join(",", [
       jsonencode(aws_api_gateway_integration.valorizacion_post),
       jsonencode(aws_api_gateway_integration.post_orden),
+      jsonencode(aws_api_gateway_integration.delete_orden),
       jsonencode(aws_api_gateway_integration.get_orden),
     ]))
   }
@@ -108,6 +126,7 @@ resource "aws_api_gateway_deployment" "main" {
   depends_on = [
     aws_api_gateway_integration.valorizacion_post,
     aws_api_gateway_integration.post_orden,
+    aws_api_gateway_integration.delete_orden,
     aws_api_gateway_integration.get_orden,
   ]
 
