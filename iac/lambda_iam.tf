@@ -92,9 +92,9 @@ resource "aws_iam_role_policy" "lambda_custom" {
         ]
       },
       {
-        Sid    = "Events"
-        Effect = "Allow"
-        Action = ["events:PutEvents"]
+        Sid      = "Events"
+        Effect   = "Allow"
+        Action   = ["events:PutEvents"]
         Resource = [aws_cloudwatch_event_bus.main.arn]
       },
       {

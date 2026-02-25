@@ -135,8 +135,8 @@ resource "aws_sqs_queue_policy" "ordenes_eventbridge" {
         Condition = {
           ArnEquals = {
             "aws:SourceArn" = [
-            aws_cloudwatch_event_rule.orden_recibida.arn,
-            aws_cloudwatch_event_rule.orden_eliminada.arn
+              aws_cloudwatch_event_rule.orden_recibida.arn,
+              aws_cloudwatch_event_rule.orden_eliminada.arn
             ]
           }
         }

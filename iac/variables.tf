@@ -28,8 +28,8 @@ variable "kms_master_key_id" {
 
 variable "alarm_email" {
   description = "Correo para notificaciones de alarmas"
-  type      = string
-  sensitive = true
+  type        = string
+  sensitive   = true
 }
 
 variable "cognito_callback_urls" {
