@@ -22,7 +22,7 @@ resource "aws_cloudwatch_event_target" "orden_recibida_sqs" {
   target_id      = "SQS_Ordenes"
   sqs_target {
     message_group_id = "default"
-    }
+  }
 }
 
 resource "aws_cloudwatch_event_rule" "orden_eliminada" {
@@ -42,7 +42,7 @@ resource "aws_cloudwatch_event_target" "orden_eliminada_sqs" {
   target_id      = "SQS_ordenes_eliminadas"
   sqs_target {
     message_group_id = "default"
-    }
+  }
 }
 
 resource "aws_cloudwatch_event_rule" "valorizacion_creada" {
@@ -62,7 +62,7 @@ resource "aws_cloudwatch_event_target" "valorizacion_sqs" {
   target_id      = "SQS_valorizaciones"
   sqs_target {
     message_group_id = "default"
-    }
+  }
 }
 
 resource "aws_cloudwatch_event_bus_policy" "allow_account" {

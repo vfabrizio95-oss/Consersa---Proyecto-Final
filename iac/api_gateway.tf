@@ -5,7 +5,7 @@ resource "aws_api_gateway_rest_api" "main" {
   endpoint_configuration {
     types = ["REGIONAL"]
   }
-  
+
   lifecycle {
     create_before_destroy = true
   }
@@ -33,7 +33,7 @@ resource "aws_api_gateway_resource" "valorizacion_id" {
 
 resource "aws_api_gateway_method" "valorizacion_post" {
   rest_api_id   = aws_api_gateway_rest_api.main.id
-  resource_id = aws_api_gateway_resource.valorizacion_id.id
+  resource_id   = aws_api_gateway_resource.valorizacion_id.id
   http_method   = "POST"
   authorization = "COGNITO_USER_POOLS"
   authorizer_id = aws_api_gateway_authorizer.cognito.id
@@ -114,7 +114,7 @@ resource "aws_api_gateway_integration" "get_orden" {
 resource "aws_api_gateway_deployment" "main" {
   rest_api_id = aws_api_gateway_rest_api.main.id
 
-   triggers = {
+  triggers = {
     redeploy = sha1(join(",", [
       jsonencode(aws_api_gateway_integration.valorizacion_post),
       jsonencode(aws_api_gateway_integration.post_orden),
@@ -161,7 +161,7 @@ resource "aws_api_gateway_stage" "main" {
 
   depends_on = [
     aws_api_gateway_account.main
-    ]
+  ]
 }
 
 resource "aws_api_gateway_method_settings" "main" {
@@ -171,11 +171,11 @@ resource "aws_api_gateway_method_settings" "main" {
 
   settings {
     caching_enabled      = true
-    cache_data_encrypted   = true
+    cache_data_encrypted = true
     cache_ttl_in_seconds = 300
-    data_trace_enabled     = false
-    logging_level          = "INFO"
-    metrics_enabled        = true
+    data_trace_enabled   = false
+    logging_level        = "INFO"
+    metrics_enabled      = true
   }
 }
 resource "aws_wafv2_web_acl" "api" {
@@ -183,11 +183,11 @@ resource "aws_wafv2_web_acl" "api" {
   scope = "REGIONAL"
 
   default_action {
-  allow {}
-}
+    allow {}
+  }
 
   rule {
-    name    = "IPReputation"
+    name     = "IPReputation"
     priority = 1
     override_action {
       none {}

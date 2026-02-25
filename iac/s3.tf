@@ -17,14 +17,14 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "pdfs" {
   bucket = aws_s3_bucket.pdfs.id
   rule {
     apply_server_side_encryption_by_default {
-      sse_algorithm = "aws:kms"
+      sse_algorithm     = "aws:kms"
       kms_master_key_id = aws_kms_key.main.arn
     }
   }
 }
 
 resource "aws_s3_bucket_public_access_block" "pdfs" {
-  bucket = aws_s3_bucket.pdfs.id
+  bucket                  = aws_s3_bucket.pdfs.id
   block_public_acls       = true
   block_public_policy     = true
   ignore_public_acls      = true
@@ -37,18 +37,18 @@ resource "aws_s3_bucket_lifecycle_configuration" "pdfs" {
     id     = "archivado"
     status = "Enabled"
     transition {
-      days = 90
+      days          = 90
       storage_class = "STANDARD_IA"
     }
     transition {
-      days = 365
+      days          = 365
       storage_class = "GLACIER"
     }
   }
 }
 resource "aws_s3_bucket" "frontend" {
   bucket = "${local.prefix}-frontend"
-  tags   = {
+  tags = {
     Name = "${local.prefix}-frontend"
   }
 }

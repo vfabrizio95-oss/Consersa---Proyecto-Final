@@ -1,5 +1,5 @@
 resource "aws_cognito_user_pool" "main" {
-  name = "${local.prefix}-user-pool"
+  name                     = "${local.prefix}-user-pool"
   username_attributes      = ["email"]
   auto_verified_attributes = ["email"]
   mfa_configuration        = "OPTIONAL"
@@ -14,10 +14,10 @@ resource "aws_cognito_user_pool" "main" {
   }
 
   schema {
-    attribute_data_type      = "String"
-    name                     = "email"
-    required                 = true
-    mutable                  = false
+    attribute_data_type = "String"
+    name                = "email"
+    required            = true
+    mutable             = false
 
     string_attribute_constraints {
       min_length = 1
@@ -69,7 +69,7 @@ resource "aws_cognito_user_pool_client" "web" {
   allowed_oauth_scopes                 = ["email", "openid", "profile"]
   allowed_oauth_flows_user_pool_client = true
   callback_urls                        = var.cognito_callback_urls
-  supported_identity_providers = ["COGNITO"]
+  supported_identity_providers         = ["COGNITO"]
 }
 
 resource "aws_cognito_user_pool_domain" "main" {

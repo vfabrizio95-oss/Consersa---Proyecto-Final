@@ -6,8 +6,8 @@ resource "aws_cloudfront_distribution" "frontend" {
   price_class         = "PriceClass_100"
 
   origin {
-    domain_name = aws_s3_bucket.frontend.bucket_regional_domain_name
-    origin_id   = "S3-${aws_s3_bucket.frontend.id}"
+    domain_name              = aws_s3_bucket.frontend.bucket_regional_domain_name
+    origin_id                = "S3-${aws_s3_bucket.frontend.id}"
     origin_access_control_id = aws_cloudfront_origin_access_control.frontend.id
   }
 
@@ -28,11 +28,11 @@ resource "aws_cloudfront_distribution" "frontend" {
       }
     }
   }
-    custom_error_response {
-      error_code            = 403
-      response_code         = 200
-      response_page_path    = "/index.html"
-      error_caching_min_ttl = 300
+  custom_error_response {
+    error_code            = 403
+    response_code         = 200
+    response_page_path    = "/index.html"
+    error_caching_min_ttl = 300
   }
 
   restrictions {
@@ -46,9 +46,9 @@ resource "aws_cloudfront_distribution" "frontend" {
   }
 
   custom_error_response {
-    error_code         = 404
-    response_code      = 200
-    response_page_path = "/index.html"
+    error_code            = 404
+    response_code         = 200
+    response_page_path    = "/index.html"
     error_caching_min_ttl = 300
   }
 }
