@@ -50,11 +50,11 @@ resource "aws_iam_role_policy" "lambda_custom" {
         ]
         Resource = [
           aws_dynamodb_table.usuarios.arn,
-          aws_dynamodb_table.informacion_original.arn,
-          aws_dynamodb_table.informacion_guardada.arn,
+          aws_dynamodb_table.ordenes.arn,      
+          aws_dynamodb_table.valorizaciones.arn,
           "${aws_dynamodb_table.usuarios.arn}/index/*",
-          "${aws_dynamodb_table.informacion_original.arn}/index/*",
-          "${aws_dynamodb_table.informacion_guardada.arn}/index/*"
+          "${aws_dynamodb_table.ordenes.arn}/index/*",
+          "${aws_dynamodb_table.valorizaciones.arn}/index/*"
         ]
       },
       {
@@ -92,9 +92,9 @@ resource "aws_iam_role_policy" "lambda_custom" {
         ]
       },
       {
-        Sid      = "Events"
-        Effect   = "Allow"
-        Action   = ["events:PutEvents"]
+        Sid    = "Events"
+        Effect = "Allow"
+        Action = ["events:PutEvents"]
         Resource = [aws_cloudwatch_event_bus.main.arn]
       },
       {

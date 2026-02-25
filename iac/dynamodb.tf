@@ -26,7 +26,7 @@ resource "aws_dynamodb_table" "usuarios" {
   }
 
   server_side_encryption {
-    enabled     = true
+    enabled = true
     kms_key_arn = aws_kms_key.main.arn
   }
 
@@ -35,33 +35,45 @@ resource "aws_dynamodb_table" "usuarios" {
   }
 }
 
-resource "aws_dynamodb_table" "informacion_original" {
-  name             = "${var.project_name}-informacion-original-${var.environment}"
+resource "aws_dynamodb_table" "ordenes" {
+  name             = "${var.project_name}-ordenes-${var.environment}"
   billing_mode     = "PAY_PER_REQUEST"
-  hash_key         = "infoId"
-  range_key        = "timestamp"
+  hash_key         = "orderId"
+  range_key        = "createdAt"
   stream_enabled   = true
   stream_view_type = "NEW_AND_OLD_IMAGES"
 
   attribute {
-    name = "infoId"
+    name = "orderId"
     type = "S"
   }
 
   attribute {
-    name = "timestamp"
+    name = "createdAt"
     type = "N"
   }
 
   attribute {
-    name = "categoria"
+    name = "userId"
     type = "S"
   }
 
+  attribute {
+    name = "status"
+    type = "S"
+  }
+
+global_secondary_index {
+    name            = "UserOrdersIndex"
+    hash_key        = "userId"
+    range_key       = "createdAt"
+    projection_type = "ALL"
+  }
+
   global_secondary_index {
-    name            = "CategoriaIndex"
-    hash_key        = "categoria"
-    range_key       = "timestamp"
+    name            = "StatusIndex"
+    hash_key        = "status"
+    range_key       = "createdAt"
     projection_type = "ALL"
   }
 
@@ -80,25 +92,24 @@ resource "aws_dynamodb_table" "informacion_original" {
   }
 
   tags = {
-    Name = "${var.project_name}-informacion-original"
+    Name = "${var.project_name}-ordenes"
   }
 }
 
-resource "aws_dynamodb_table" "informacion_guardada" {
-  name             = "${var.project_name}-informacion-guardada-${var.environment}"
+resource "aws_dynamodb_table" "valorizaciones" {
+  name             = "${var.project_name}-valorizaciones-${var.environment}"
   billing_mode     = "PAY_PER_REQUEST"
-  hash_key         = "savedId"
-  range_key        = "userId"
+  hash_key         = "orderId" 
   stream_enabled   = true
   stream_view_type = "NEW_AND_OLD_IMAGES"
 
   attribute {
-    name = "savedId"
+    name = "orderId"
     type = "S"
   }
 
   attribute {
-    name = "userId"
+    name = "status"
     type = "S"
   }
 
@@ -107,11 +118,16 @@ resource "aws_dynamodb_table" "informacion_guardada" {
     type = "N"
   }
 
-  global_secondary_index {
-    name            = "UserIndex"
-    hash_key        = "userId"
+global_secondary_index {
+    name            = "StatusIndex"
+    hash_key        = "status"
     range_key       = "createdAt"
     projection_type = "ALL"
+  }
+
+  ttl {
+    attribute_name = "expirationTime"
+    enabled        = true
   }
 
   point_in_time_recovery {
@@ -124,6 +140,6 @@ resource "aws_dynamodb_table" "informacion_guardada" {
   }
 
   tags = {
-    Name = "${var.project_name}-informacion-guardada"
+    Name = "${var.project_name}-valorizaciones"
   }
 }

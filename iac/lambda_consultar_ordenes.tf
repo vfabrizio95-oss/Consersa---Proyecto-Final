@@ -20,8 +20,8 @@ resource "aws_lambda_function" "consultar_ordenes" {
   environment {
     variables = {
       TABLE_USUARIOS             = aws_dynamodb_table.usuarios.name
-      TABLE_INFORMACION_ORIGINAL = aws_dynamodb_table.informacion_original.name
-      TABLE_INFORMACION_GUARDADA = aws_dynamodb_table.informacion_guardada.name
+      TABLE_ORDENES        = aws_dynamodb_table.ordenes.name       
+      TABLE_VALORIZACIONES = aws_dynamodb_table.valorizaciones.name
     }
   }
 }
