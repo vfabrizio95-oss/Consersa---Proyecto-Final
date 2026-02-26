@@ -54,15 +54,6 @@ resource "aws_sqs_queue" "ordenes_dlq" {
   }
 }
 
-resource "aws_sns_topic" "notificaciones" {
-  name              = "${local.prefix}-notificaciones"
-  kms_master_key_id = aws_kms_key.main.id
-
-  tags = {
-    Name = "${local.prefix}-sns-notificaciones"
-  }
-}
-
 resource "aws_sns_topic" "valorizacion_terminada" {
   name                        = "${local.prefix}-valorizacion-terminada.fifo"
   fifo_topic                  = true
@@ -74,11 +65,10 @@ resource "aws_sns_topic" "valorizacion_terminada" {
   }
 }
 
-resource "aws_sns_topic_subscription" "valorizacion_a_sqs" {
-  topic_arn            = aws_sns_topic.valorizacion_terminada.arn
-  protocol             = "sqs"
-  endpoint             = aws_sqs_queue.valorizaciones.arn
-  raw_message_delivery = true
+resource "aws_sns_topic_subscription" "valorizacion_email" {
+  topic_arn = aws_sns_topic.valorizacion_terminada.arn
+  protocol  = "email"
+  endpoint  = var.alarm_email
 }
 
 resource "aws_sqs_queue_policy" "valorizaciones_policy" {
@@ -87,20 +77,6 @@ resource "aws_sqs_queue_policy" "valorizaciones_policy" {
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
-      {
-        Sid    = "AllowSNS"
-        Effect = "Allow"
-        Principal = {
-          Service = "sns.amazonaws.com"
-        }
-        Action   = "sqs:SendMessage"
-        Resource = aws_sqs_queue.valorizaciones.arn
-        Condition = {
-          ArnEquals = {
-            "aws:SourceArn" = aws_sns_topic.valorizacion_terminada.arn
-          }
-        }
-      },
       {
         Sid    = "AllowEventBridge"
         Effect = "Allow"
@@ -119,13 +95,14 @@ resource "aws_sqs_queue_policy" "valorizaciones_policy" {
   })
 }
 
-resource "aws_sqs_queue_policy" "ordenes_eventbridge" {
+resource "aws_sqs_queue_policy" "ordenes_policy" {
   queue_url = aws_sqs_queue.ordenes.url
 
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
+        Sid    = "AllowEventBridge"
         Effect = "Allow"
         Principal = {
           Service = "events.amazonaws.com"
@@ -143,4 +120,18 @@ resource "aws_sqs_queue_policy" "ordenes_eventbridge" {
       }
     ]
   })
+}
+
+resource "aws_lambda_event_source_mapping" "ordenes_a_pdf" {
+  event_source_arn = aws_sqs_queue.ordenes.arn
+  function_name    = aws_lambda_function.pdf_processing.arn
+  batch_size       = 1
+  enabled          = true
+}
+
+resource "aws_lambda_event_source_mapping" "valorizaciones_a_completada" {
+  event_source_arn = aws_sqs_queue.valorizaciones.arn
+  function_name    = aws_lambda_function.valorizacion_completada.arn
+  batch_size       = 1
+  enabled          = true
 }
