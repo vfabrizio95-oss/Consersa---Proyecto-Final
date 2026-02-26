@@ -28,14 +28,14 @@ output "dynamodb_tabla_usuarios" {
   value       = aws_dynamodb_table.usuarios.name
 }
 
-output "dynamodb_tabla_informacion_original" {
-  description = "Nombre de la tabla DynamoDB informacion_original"
-  value       = aws_dynamodb_table.informacion_original.name
+output "dynamodb_tabla_ordenes" {
+  description = "Nombre de la tabla DynamoDB ordenes"
+  value       = aws_dynamodb_table.ordenes.name
 }
 
-output "dynamodb_tabla_informacion_guardada" {
-  description = "Nombre de la tabla DynamoDB informacion_guardada"
-  value       = aws_dynamodb_table.informacion_guardada.name
+output "dynamodb_tabla_valorizaciones" {
+  description = "Nombre de la tabla DynamoDB valorizaciones"
+  value       = aws_dynamodb_table.valorizaciones.name
 }
 
 output "sqs_valorizaciones_url" {

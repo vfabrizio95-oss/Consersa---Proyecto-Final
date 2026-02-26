@@ -10,8 +10,8 @@ resource "aws_cloudwatch_event_rule" "orden_recibida" {
   event_bus_name = aws_cloudwatch_event_bus.main.name
 
   event_pattern = jsonencode({
-    source      = ["Consersa.ordenes"]   
-    detail-type = ["Order Recibida"]   
+    source      = ["Consersa.ordenes"]
+    detail-type = ["Order Recibida"]
   })
 }
 
@@ -30,7 +30,7 @@ resource "aws_cloudwatch_event_rule" "orden_eliminada" {
   event_bus_name = aws_cloudwatch_event_bus.main.name
 
   event_pattern = jsonencode({
-    source      = ["Consersa.ordenes"]   
+    source      = ["Consersa.ordenes"]
     detail-type = ["Order Eliminada"]
   })
 }
@@ -50,7 +50,7 @@ resource "aws_cloudwatch_event_rule" "valorizacion_creada" {
   event_bus_name = aws_cloudwatch_event_bus.main.name
 
   event_pattern = jsonencode({
-    source      = ["Consersa.valorizaciones"] 
+    source      = ["Consersa.valorizaciones"]
     detail-type = ["Valorizacion Creada"]
   })
 }

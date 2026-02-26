@@ -50,20 +50,11 @@ resource "aws_iam_role_policy" "lambda_custom" {
         ]
         Resource = [
           aws_dynamodb_table.usuarios.arn,
-          aws_dynamodb_table.ordenes.arn,      
+          aws_dynamodb_table.ordenes.arn,
           aws_dynamodb_table.valorizaciones.arn,
           "${aws_dynamodb_table.usuarios.arn}/index/*",
           "${aws_dynamodb_table.ordenes.arn}/index/*",
           "${aws_dynamodb_table.valorizaciones.arn}/index/*"
-        ]
-      },
-      {
-        Sid    = "SNS"
-        Effect = "Allow"
-        Action = ["sns:Publish"]
-        Resource = [
-          aws_sns_topic.notificaciones.arn,
-          aws_sns_topic.valorizacion_terminada.arn
         ]
       },
       {
@@ -92,9 +83,9 @@ resource "aws_iam_role_policy" "lambda_custom" {
         ]
       },
       {
-        Sid    = "Events"
-        Effect = "Allow"
-        Action = ["events:PutEvents"]
+        Sid      = "Events"
+        Effect   = "Allow"
+        Action   = ["events:PutEvents"]
         Resource = [aws_cloudwatch_event_bus.main.arn]
       },
       {

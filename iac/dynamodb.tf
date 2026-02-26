@@ -26,7 +26,7 @@ resource "aws_dynamodb_table" "usuarios" {
   }
 
   server_side_encryption {
-    enabled = true
+    enabled     = true
     kms_key_arn = aws_kms_key.main.arn
   }
 
@@ -63,7 +63,7 @@ resource "aws_dynamodb_table" "ordenes" {
     type = "S"
   }
 
-global_secondary_index {
+  global_secondary_index {
     name            = "UserOrdersIndex"
     hash_key        = "userId"
     range_key       = "createdAt"
@@ -99,7 +99,7 @@ global_secondary_index {
 resource "aws_dynamodb_table" "valorizaciones" {
   name             = "${var.project_name}-valorizaciones-${var.environment}"
   billing_mode     = "PAY_PER_REQUEST"
-  hash_key         = "orderId" 
+  hash_key         = "orderId"
   stream_enabled   = true
   stream_view_type = "NEW_AND_OLD_IMAGES"
 
@@ -118,7 +118,7 @@ resource "aws_dynamodb_table" "valorizaciones" {
     type = "N"
   }
 
-global_secondary_index {
+  global_secondary_index {
     name            = "StatusIndex"
     hash_key        = "status"
     range_key       = "createdAt"

@@ -54,23 +54,6 @@ environment                = "dev"
 |-------------|--------------------------------------------------|
 | domain_name | Dominio para CloudFront (Consersa.store)         |
 
-6. Al ser un dominio comprado en namecheap necesitaremos los Nameservers que se ven algo asi
-```
-ns-xxxx.awsdns-xx.org
-ns-xxxx.awsdns-xx.co.uk
-ns-xx.awsdns-xx.com
-ns-xxxx.awsdns-xx.net
-```
-estos ns los encontraremos dentro de aws en router53 en zonas alojadas, crearemos uno con el nombre de nuestro dominio
-```
-consersa.store
-```
-y luego de crearla debemos entrar y dentro en el registro tipo NS estaran, esos tendremos que copiarlo y en la pagina de  namecheap dodne compramos el dominio las podnremos, entrando a la opcion manage, ye en la parte que diga NAMESERVERS, seleccionamos Custom DNS y colocamos las ns y guardamos, para verificar pondremos lo siguiente
-```
-nslookup -type=ns consersa.store
-```
-nos mostraria los 4 NS de AWS y todo estaria en orden, si no sale eso tendremos que esperar y volver a poner el comando ya que esto puede tardar un rato
-
 # Test de vulnerabilidad
 ## checkov 
 1. Descargamos la imagen de Checkov versión 3
@@ -109,4 +92,19 @@ terraform apply
 ```
 Y confirmamos con yes
 
-7. Al estar desplegando necesitaremos confirmar una subscripcion de aws para notificaciones que llegara al gmail colocado en alarm_email.
+7. Al ser un dominio comprado en namecheap necesitaremos los Nameservers que se ven algo asi
+```
+ns-xxxx.awsdns-xx.org
+ns-xxxx.awsdns-xx.co.uk
+ns-xx.awsdns-xx.com
+ns-xxxx.awsdns-xx.net
+```
+estos ns los encontraremos dentro de aws en router53 en zonas alojadas, al estar desplegandose se crearia uno que se llame
+```
+consersa.store
+```
+luego debemos entrar y dentro en el registro tipo NS estaran, esos tendremos que copiarlo y en la pagina de  namecheap donde compramos el dominio las pondremos, entrando a la opcion manage, ye en la parte que diga NAMESERVERS, seleccionamos Custom DNS y colocamos las ns y guardamos, para verificar pondremos lo siguiente
+```
+nslookup -type=ns consersa.store
+```
+nos mostraria los 4 NS de AWS y todo estaria en orden, si no sale eso tendremos que esperar y volver a poner el comando ya que esto puede tardar un rato

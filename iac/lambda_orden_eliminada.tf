@@ -19,10 +19,10 @@ resource "aws_lambda_function" "orden_eliminada" {
 
   environment {
     variables = {
-      TABLE_USUARIOS  = aws_dynamodb_table.usuarios.name
-      TABLE_ORDENES        = aws_dynamodb_table.ordenes.name       
+      TABLE_USUARIOS       = aws_dynamodb_table.usuarios.name
+      TABLE_ORDENES        = aws_dynamodb_table.ordenes.name
       TABLE_VALORIZACIONES = aws_dynamodb_table.valorizaciones.name
-      EVENT_BUS_NAME = aws_cloudwatch_event_bus.main.name
+      EVENT_BUS_NAME       = aws_cloudwatch_event_bus.main.name
     }
   }
 }

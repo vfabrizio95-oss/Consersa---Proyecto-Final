@@ -19,8 +19,8 @@ resource "aws_lambda_function" "pdf_processing" {
 
   environment {
     variables = {
-      PDF_BUCKET = aws_s3_bucket.pdfs.bucket
-      TABLE_ORDENES        = aws_dynamodb_table.ordenes.name       
+      PDF_BUCKET           = aws_s3_bucket.pdfs.bucket
+      TABLE_ORDENES        = aws_dynamodb_table.ordenes.name
       TABLE_VALORIZACIONES = aws_dynamodb_table.valorizaciones.name
     }
   }
