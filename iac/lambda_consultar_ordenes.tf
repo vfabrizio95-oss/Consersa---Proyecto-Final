@@ -7,6 +7,13 @@ resource "aws_lambda_function" "consultar_ordenes" {
   timeout          = 30
   memory_size      = 256
   source_code_hash = data.archive_file.placeholder.output_base64sha256
+  
+  kms_key_arn = aws_kms_key.main.arn
+  reserved_concurrent_executions = 10
+
+  dead_letter_config {
+    target_arn = aws_sqs_queue.ordenes_dlq.arn
+}
 
   vpc_config {
     subnet_ids         = aws_subnet.private[*].id
