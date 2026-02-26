@@ -14,37 +14,44 @@ resource "aws_xray_sampling_rule" "main" {
 
 resource "aws_cloudwatch_log_group" "api" {
   name              = "/aws/apigateway/${local.prefix}"
-  retention_in_days = 30
+  retention_in_days = 365
+  kms_key_id        = aws_kms_key.main.arn
 }
 
 resource "aws_cloudwatch_log_group" "lambda_valorizacion_negocio" {
   name              = "/aws/lambda/${aws_lambda_function.valorizacion_consersa.function_name}"
-  retention_in_days = 30
+  retention_in_days = 365
+  kms_key_id        = aws_kms_key.main.arn
 }
 
 resource "aws_cloudwatch_log_group" "lambda_orden_recibida" {
   name              = "/aws/lambda/${aws_lambda_function.orden_recibida.function_name}"
-  retention_in_days = 30
+  retention_in_days = 365
+  kms_key_id        = aws_kms_key.main.arn
 }
 
 resource "aws_cloudwatch_log_group" "lambda_orden_eliminada" {
   name              = "/aws/lambda/${aws_lambda_function.orden_eliminada.function_name}"
-  retention_in_days = 30
+  retention_in_days = 365
+  kms_key_id        = aws_kms_key.main.arn
 }
 
 resource "aws_cloudwatch_log_group" "lambda_consultar_ordenes" {
   name              = "/aws/lambda/${aws_lambda_function.consultar_ordenes.function_name}"
-  retention_in_days = 30
+  retention_in_days = 365
+  kms_key_id        = aws_kms_key.main.arn
 }
 
 resource "aws_cloudwatch_log_group" "lambda_valorizacion_completada" {
   name              = "/aws/lambda/${aws_lambda_function.valorizacion_completada.function_name}"
-  retention_in_days = 30
+  retention_in_days = 365
+  kms_key_id        = aws_kms_key.main.arn
 }
 
 resource "aws_cloudwatch_log_group" "lambda_pdf_processing" {
   name              = "/aws/lambda/${aws_lambda_function.pdf_processing.function_name}"
-  retention_in_days = 30
+  retention_in_days = 365
+  kms_key_id        = aws_kms_key.main.arn
 }
 
 resource "aws_sns_topic" "alarmas" {
