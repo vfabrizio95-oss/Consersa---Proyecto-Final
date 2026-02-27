@@ -109,3 +109,16 @@ resource "aws_s3_bucket_policy" "frontend" {
     }]
   })
 }
+
+resource "aws_s3_bucket_lifecycle_configuration" "frontend" {
+  bucket = aws_s3_bucket.frontend.id
+
+  rule {
+    id     = "cleanup-frontend"
+    status = "Enabled"
+
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 7
+    }
+  }
+}
