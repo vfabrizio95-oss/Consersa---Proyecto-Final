@@ -167,7 +167,7 @@ resource "aws_api_gateway_stage" "main" {
 resource "aws_api_gateway_method_settings" "main" {
   rest_api_id = aws_api_gateway_rest_api.main.id
   stage_name  = aws_api_gateway_stage.main.stage_name
-  method_path = "*/*"
+  method_path = "/"
 
   settings {
     caching_enabled      = true
@@ -220,6 +220,28 @@ resource "aws_wafv2_web_acl" "api" {
     visibility_config {
       cloudwatch_metrics_enabled = true
       metric_name                = "${local.prefix}-common"
+      sampled_requests_enabled   = true
+    }
+  }
+
+    rule {
+    name     = "KnownBadInputs"
+    priority = 3
+
+    override_action {
+      none {}
+    }
+
+    statement {
+      managed_rule_group_statement {
+        name        = "AWSManagedRulesKnownBadInputsRuleSet"
+        vendor_name = "AWS"
+      }
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "${local.prefix}-known-bad-inputs"
       sampled_requests_enabled   = true
     }
   }
