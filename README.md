@@ -7,6 +7,8 @@
 4. [Tecnologías y Requerimientos No Funcionales](#️-tecnologías-y-requerimientos-no-funcionales)
 5. [Justificación de la arquitectura](#️-justificación-de-la-arquitectura)
 6. [Requisitos no funcionales](#️-requisito-no-funcionales)
+7. [Ramas de desarrollo y flujo de integracion](#-ramas-de-desarrollo-y-flujo-de-integracion)
+8. [Preguntas operativas](#-preguntas-operativas)
 ---
 
 ## Contexto de la empresa
@@ -71,3 +73,30 @@ y lo vuelve a valorizar. Esta actividad cuesta 13,901.96 soles, esta actividad s
 | RNF 21 | Flexibilidad | El sistema debe soportar hasta 50 actividades por orden mediante arquitectura desacoplada y persistencia flexible de estados. | AWS Lambda + Amazon EventBridge + Amazon SQS (DLQ) + Amazon DynamoDB |
 | RNF 22 | Modificabilidad | El sistema debe permitir el despliegue y modificación independiente de los servicios de negocio sin afectar otros componentes. | AWS Lambda + Amazon SQS |
 | RNF 23 | Observabilidad | El sistema debe monitorear el 100% de ejecuciones y solicitudes, registrando métricas, logs y trazabilidad distribuida, generando alertas automáticas ante fallos críticos. | Amazon CloudWatch + AWS X-Ray + Amazon SNS + AWS Lambda + Amazon API Gateway |
+
+---
+
+## Ramas de desarrollo y flujo de integración
+
+- Main (producción): Contiene la versión estable lista para despliegue. Solo se integran cambios validados desde develop.
+- Develop (integración): Acumula funcionalidades desde ramas feature/*, se prueban y luego se pasa a main.
+- Feature (característica): Espacio de trabajo para una funcionalidad específica. Al finalizar, se integra a develop y luego a main.
+
+---
+
+## Preguntas Operativas
+
+- ¿Cuántos usuarios utilizarán el sistema?
+El sistema será utilizado por aproximadamente 100 usuarios internos, entre operarios del Call Center de Consersa y  valorizadores. Estos usuarios se encuentran distribuidos en dos turnos operativos: mañana (7:00 a.m. – 3:00 p.m.) y tarde (3:00 p.m. – 11:00 p.m.).
+- ¿Cuántos usuarios estarán conectados a la vez?
+Dado que el personal se divide en dos turnos, se estima que habrá aproximadamente 50 usuarios conectados simultáneamente por turno. No obstante, el sistema ha sido diseñado para soportar hasta 100 sesiones concurrentes, conforme al RNF 01, considerando posibles escenarios de solapamiento en el cambio de turno o picos de carga.
+- ¿Cuáles son los periodos de actividad/carga del servicio?
+Los periodos de mayor actividad comprenden el rango de 7:00 a.m. a 11:00 p.m., correspondientes a las 16 horas de operación diaria. En este intervalo se concentra el procesamiento de órdenes de servicio, el registro de hojas de campo provenientes de las cuadrillas y el proceso de valorización. El momento de mayor criticidad ocurre durante el cambio de turno a las 3:00 p.m., donde puede incrementarse la concurrencia.
+- ¿Cuánto tiempo debe estar disponible el servicio?
+El servicio debe mantenerse disponible de forma crítica durante las 16 horas de operación diaria, con una disponibilidad mínima mensual del 99.9%. Cualquier interrupción, especialmente en el cambio de turno, podría generar duplicidad o eliminación indebida de órdenes ya valorizadas, ocasionando pérdidas económicas estimadas en aproximadamente S/ 13,901.96 por cada orden mal gestionada.
+- Backups y frecuencia
+El sistema contará con copias de seguridad automáticas y recuperación punto en el tiempo (PITR) configuradas en Amazon DynamoDB, con una retención mínima de 30 días. Adicionalmente, ante fallos en el procesamiento de eventos, las órdenes no se perderán, ya que serán enviadas a colas de errores (DLQ) en Amazon SQS para su posterior análisis y reprocesamiento, garantizando integridad y recuperación ante incidentes.
+- ¿Cuánta data se generará por año?
+Considerando un máximo aproximado de 200 órdenes diarias, el sistema podría registrar alrededor de 73,000 órdenes al año. Cada orden genera información estructurada, eventos asociados y registros de auditoría, por lo que se proyecta un crecimiento anual moderado y totalmente manejable por la infraestructura planteada.
+- Tiempos de respuesta
+El sistema debe garantizar tiempos de respuesta óptimos incluso con hasta 100 usuarios concurrentes. Se establece que el 95% de las consultas deben resolverse en menos de 2 segundos, el registro de una orden no debe superar los 3 segundos y los cambios de estado deben reflejarse en un tiempo máximo de 2 segundos. Esto se logra mediante una arquitectura Serverless implementada sobre Amazon Web Services, utilizando AWS Lambda y Amazon API Gateway para el procesamiento y escalabilidad automática de solicitudes, junto con Amazon EventBridge para la gestión eficiente de eventos, asegurando baja latencia y estabilidad aun en escenarios de alta concurrencia.
