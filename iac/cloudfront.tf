@@ -61,7 +61,7 @@ resource "aws_cloudfront_distribution" "frontend" {
     response_page_path    = "/index.html"
     error_caching_min_ttl = 300
   }
-  
+
   origin_group {
     origin_id = "group1"
       

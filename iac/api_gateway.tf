@@ -259,3 +259,14 @@ resource "aws_wafv2_web_acl_association" "api" {
   resource_arn = aws_api_gateway_stage.main.arn
   web_acl_arn  = aws_wafv2_web_acl.api.arn
 }
+
+resource "aws_cloudwatch_log_group" "waf" {
+  name              = "/aws/waf/${local.prefix}"
+  retention_in_days = 365
+  kms_key_id        = aws_kms_key.main.arn
+}
+
+resource "aws_wafv2_web_acl_logging_configuration" "api_logging" {
+  resource_arn            = aws_wafv2_web_acl.api.arn
+  log_destination_configs = [aws_cloudwatch_log_group.waf.arn]
+}
