@@ -193,3 +193,9 @@ resource "aws_cloudwatch_dashboard" "main" {
     ]
   })
 }
+
+resource "aws_cloudwatch_log_group" "vpc_flow_logs" {
+  name              = "/aws/vpc/${local.prefix}-flowlogs"
+  retention_in_days = 365
+  kms_key_id        = aws_kms_key.main.arn
+}
