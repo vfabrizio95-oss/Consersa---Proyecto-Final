@@ -39,11 +39,11 @@ resource "aws_api_gateway_resource" "valorizacion_id" {
 }
 
 resource "aws_api_gateway_method" "valorizacion_post" {
-  rest_api_id   = aws_api_gateway_rest_api.main.id
-  resource_id   = aws_api_gateway_resource.valorizacion_id.id
-  http_method   = "POST"
-  authorization = "COGNITO_USER_POOLS"
-  authorizer_id = aws_api_gateway_authorizer.cognito.id
+  rest_api_id          = aws_api_gateway_rest_api.main.id
+  resource_id          = aws_api_gateway_resource.valorizacion_id.id
+  http_method          = "POST"
+  authorization        = "COGNITO_USER_POOLS"
+  authorizer_id        = aws_api_gateway_authorizer.cognito.id
   request_validator_id = aws_api_gateway_request_validator.validator.id
 }
 
@@ -69,11 +69,11 @@ resource "aws_api_gateway_resource" "orden_id" {
 }
 
 resource "aws_api_gateway_method" "post_orden" {
-  rest_api_id   = aws_api_gateway_rest_api.main.id
-  resource_id   = aws_api_gateway_resource.orden_id.id
-  http_method   = "POST"
-  authorization = "COGNITO_USER_POOLS"
-  authorizer_id = aws_api_gateway_authorizer.cognito.id
+  rest_api_id          = aws_api_gateway_rest_api.main.id
+  resource_id          = aws_api_gateway_resource.orden_id.id
+  http_method          = "POST"
+  authorization        = "COGNITO_USER_POOLS"
+  authorizer_id        = aws_api_gateway_authorizer.cognito.id
   request_validator_id = aws_api_gateway_request_validator.validator.id
 }
 
@@ -87,11 +87,11 @@ resource "aws_api_gateway_integration" "post_orden" {
 }
 
 resource "aws_api_gateway_method" "delete_orden" {
-  rest_api_id   = aws_api_gateway_rest_api.main.id
-  resource_id   = aws_api_gateway_resource.orden_id.id
-  http_method   = "DELETE"
-  authorization = "COGNITO_USER_POOLS"
-  authorizer_id = aws_api_gateway_authorizer.cognito.id
+  rest_api_id          = aws_api_gateway_rest_api.main.id
+  resource_id          = aws_api_gateway_resource.orden_id.id
+  http_method          = "DELETE"
+  authorization        = "COGNITO_USER_POOLS"
+  authorizer_id        = aws_api_gateway_authorizer.cognito.id
   request_validator_id = aws_api_gateway_request_validator.validator.id
 }
 
@@ -105,11 +105,11 @@ resource "aws_api_gateway_integration" "delete_orden" {
 }
 
 resource "aws_api_gateway_method" "get_orden" {
-  rest_api_id   = aws_api_gateway_rest_api.main.id
-  resource_id   = aws_api_gateway_resource.orden_id.id
-  http_method   = "GET"
-  authorization = "COGNITO_USER_POOLS"
-  authorizer_id = aws_api_gateway_authorizer.cognito.id
+  rest_api_id          = aws_api_gateway_rest_api.main.id
+  resource_id          = aws_api_gateway_resource.orden_id.id
+  http_method          = "GET"
+  authorization        = "COGNITO_USER_POOLS"
+  authorizer_id        = aws_api_gateway_authorizer.cognito.id
   request_validator_id = aws_api_gateway_request_validator.validator.id
 }
 
@@ -178,7 +178,7 @@ resource "aws_api_gateway_stage" "main" {
 resource "aws_api_gateway_method_settings" "main" {
   rest_api_id = aws_api_gateway_rest_api.main.id
   stage_name  = aws_api_gateway_stage.main.stage_name
-  method_path = "/"
+  method_path = "*/*"
 
   settings {
     caching_enabled      = true
@@ -275,9 +275,4 @@ resource "aws_cloudwatch_log_group" "waf" {
   name              = "/aws/waf/${local.prefix}"
   retention_in_days = 365
   kms_key_id        = aws_kms_key.main.arn
-}
-
-resource "aws_wafv2_web_acl_logging_configuration" "api_logging" {
-  resource_arn            = aws_wafv2_web_acl.api.arn
-  log_destination_configs = [aws_cloudwatch_log_group.waf.arn]
 }

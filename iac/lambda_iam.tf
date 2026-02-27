@@ -79,7 +79,8 @@ resource "aws_iam_role_policy" "lambda_custom" {
         ]
         Resource = [
           aws_sqs_queue.valorizaciones.arn,
-          aws_sqs_queue.ordenes.arn
+          aws_sqs_queue.ordenes.arn,
+          aws_sqs_queue.lambda_dlq.arn
         ]
       },
       {

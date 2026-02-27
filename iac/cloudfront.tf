@@ -4,7 +4,6 @@ resource "aws_cloudfront_distribution" "frontend" {
   default_root_object = "index.html"
   comment             = "${local.prefix} frontend"
   price_class         = "PriceClass_100"
-  web_acl_id          = aws_wafv2_web_acl.api.arn
 
   origin {
     domain_name              = aws_s3_bucket.frontend.bucket_regional_domain_name
@@ -61,35 +60,22 @@ resource "aws_cloudfront_distribution" "frontend" {
     response_page_path    = "/index.html"
     error_caching_min_ttl = 300
   }
-
-  origin_group {
-    origin_id = "group1"
-      
-    failover_criteria {
-      status_codes = [500, 502, 503, 504]
-    }
-        
-    member {
-      origin_id = "origin1"
-    }
-      
-    member {
-      origin_id = "origin2"
-    }
-  }
 }
 
 resource "aws_s3_bucket" "logs" {
   bucket = "${local.prefix}-cloudfront-logs"
 
-  logging {
-    target_bucket = aws_s3_bucket.audit_logs.id
-    target_prefix = "cloudfront-logs/"
-  }
+  force_destroy = true
 
   tags = {
     Name = "${local.prefix}-cloudfront-logs"
   }
+}
+
+resource "aws_s3_bucket_logging" "logs" {
+  bucket        = aws_s3_bucket.logs.id
+  target_bucket = aws_s3_bucket.audit_logs.id
+  target_prefix = "cloudfront-logs/"
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "logs" {
@@ -115,7 +101,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "logs" {
     }
 
     abort_incomplete_multipart_upload {
-    days_after_initiation = 7
+      days_after_initiation = 7
     }
   }
 }
@@ -135,9 +121,28 @@ resource "aws_s3_bucket_public_access_block" "logs" {
   restrict_public_buckets = true
 }
 
+resource "aws_s3_bucket_ownership_controls" "logs" {
+  bucket = aws_s3_bucket.logs.id
+
+  rule {
+    object_ownership = "ObjectWriter"
+  }
+}
+
+resource "aws_s3_bucket_acl" "logs" {
+  bucket = aws_s3_bucket.logs.id
+  acl    = "log-delivery-write"
+
+  depends_on = [
+    aws_s3_bucket_ownership_controls.logs
+  ]
+}
+
 resource "aws_s3_bucket" "audit_logs" {
   bucket = "${local.prefix}-audit-logs"
 
+  force_destroy = true 
+  
   tags = {
     Name = "${local.prefix}-audit-logs"
   }
@@ -163,7 +168,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "audit_logs" {
     }
 
     abort_incomplete_multipart_upload {
-    days_after_initiation = 7
+      days_after_initiation = 7
     }
   }
 }

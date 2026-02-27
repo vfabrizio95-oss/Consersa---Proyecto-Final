@@ -1,14 +1,15 @@
 resource "aws_s3_bucket" "pdfs" {
   bucket = lower("${local.prefix}-pdfs")
 
-  logging {
-    target_bucket = aws_s3_bucket.logs.id
-    target_prefix = "pdfs/"
-  }
-
   tags = {
     Name = "${local.prefix}-pdfs"
   }
+}
+
+resource "aws_s3_bucket_logging" "pdfs" {
+  bucket        = aws_s3_bucket.pdfs.id
+  target_bucket = aws_s3_bucket.logs.id
+  target_prefix = "pdfs/"
 }
 
 resource "aws_s3_bucket_versioning" "pdfs" {
@@ -51,21 +52,22 @@ resource "aws_s3_bucket_lifecycle_configuration" "pdfs" {
       storage_class = "GLACIER"
     }
     abort_incomplete_multipart_upload {
-    days_after_initiation = 7
+      days_after_initiation = 7
     }
   }
 }
 resource "aws_s3_bucket" "frontend" {
   bucket = "${local.prefix}-frontend"
 
-  logging {
-    target_bucket = aws_s3_bucket.logs.id
-    target_prefix = "frontend/"
-  }
-
   tags = {
     Name = "${local.prefix}-frontend"
   }
+}
+
+resource "aws_s3_bucket_logging" "frontend" {
+  bucket        = aws_s3_bucket.frontend.id
+  target_bucket = aws_s3_bucket.logs.id
+  target_prefix = "frontend/"
 }
 
 resource "aws_s3_bucket_versioning" "frontend" {
