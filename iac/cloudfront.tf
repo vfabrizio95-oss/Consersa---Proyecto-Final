@@ -64,6 +64,36 @@ resource "aws_cloudfront_distribution" "frontend" {
 
 resource "aws_s3_bucket" "logs" {
   bucket = "${local.prefix}-cloudfront-logs"
+
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        kms_master_key_id = aws_kms_key.main.arn
+        sse_algorithm     = "aws:kms"
+      }
+    }
+  }
+
+  tags = {
+    Name = "${local.prefix}-cloudfront-logs"
+  }
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "logs" {
+  bucket = aws_s3_bucket.logs.id
+
+  rule {
+    id     = "cleanup-logs"
+    status = "Enabled"
+
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 7
+    }
+
+    expiration {
+      days = 365
+    }
+  }
 }
 
 resource "aws_s3_bucket_versioning" "logs" {
