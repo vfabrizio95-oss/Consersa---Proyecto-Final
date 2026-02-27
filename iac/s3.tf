@@ -1,5 +1,11 @@
 resource "aws_s3_bucket" "pdfs" {
   bucket = lower("${local.prefix}-pdfs")
+
+  logging {
+    target_bucket = aws_s3_bucket.logs.id
+    target_prefix = "pdfs/"
+  }
+
   tags = {
     Name = "${local.prefix}-pdfs"
   }
@@ -51,6 +57,12 @@ resource "aws_s3_bucket_lifecycle_configuration" "pdfs" {
 }
 resource "aws_s3_bucket" "frontend" {
   bucket = "${local.prefix}-frontend"
+
+  logging {
+    target_bucket = aws_s3_bucket.logs.id
+    target_prefix = "frontend/"
+  }
+
   tags = {
     Name = "${local.prefix}-frontend"
   }
