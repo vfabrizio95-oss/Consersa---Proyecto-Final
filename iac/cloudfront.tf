@@ -46,6 +46,7 @@ resource "aws_cloudfront_distribution" "frontend" {
 
   viewer_certificate {
     cloudfront_default_certificate = true
+    minimum_protocol_version       = "TLSv1.2_2021"
   }
 
   logging_config {
@@ -65,17 +66,24 @@ resource "aws_cloudfront_distribution" "frontend" {
 resource "aws_s3_bucket" "logs" {
   bucket = "${local.prefix}-cloudfront-logs"
 
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        kms_master_key_id = aws_kms_key.main.arn
-        sse_algorithm     = "aws:kms"
-      }
-    }
+  logging {
+    target_bucket = aws_s3_bucket.audit_logs.id
+    target_prefix = "cloudfront-logs/"
   }
 
   tags = {
     Name = "${local.prefix}-cloudfront-logs"
+  }
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "logs" {
+  bucket = aws_s3_bucket.logs.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      kms_master_key_id = aws_kms_key.main.arn
+      sse_algorithm     = "aws:kms"
+    }
   }
 }
 
@@ -86,12 +94,12 @@ resource "aws_s3_bucket_lifecycle_configuration" "logs" {
     id     = "cleanup-logs"
     status = "Enabled"
 
-    abort_incomplete_multipart_upload {
-      days_after_initiation = 7
-    }
-
     expiration {
       days = 365
+    }
+
+    abort_incomplete_multipart_upload {
+    days_after_initiation = 7
     }
   }
 }
@@ -105,6 +113,58 @@ resource "aws_s3_bucket_versioning" "logs" {
 
 resource "aws_s3_bucket_public_access_block" "logs" {
   bucket                  = aws_s3_bucket.logs.id
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket" "audit_logs" {
+  bucket = "${local.prefix}-audit-logs"
+
+  tags = {
+    Name = "${local.prefix}-audit-logs"
+  }
+}
+
+resource "aws_s3_bucket_versioning" "audit_logs" {
+  bucket = aws_s3_bucket.audit_logs.id
+
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "audit_logs" {
+  bucket = aws_s3_bucket.audit_logs.id
+
+  rule {
+    id     = "log-retention"
+    status = "Enabled"
+
+    expiration {
+      days = 365
+    }
+
+    abort_incomplete_multipart_upload {
+    days_after_initiation = 7
+    }
+  }
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "audit_logs" {
+  bucket = aws_s3_bucket.audit_logs.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      kms_master_key_id = aws_kms_key.main.arn
+      sse_algorithm     = "aws:kms"
+    }
+  }
+}
+
+resource "aws_s3_bucket_public_access_block" "audit_logs" {
+  bucket                  = aws_s3_bucket.audit_logs.id
   block_public_acls       = true
   block_public_policy     = true
   ignore_public_acls      = true
@@ -147,4 +207,12 @@ resource "aws_cloudfront_response_headers_policy" "security_headers" {
       override                   = true
     }
   }
+}
+
+resource "aws_s3_bucket_notification" "logs_notification" {
+  bucket = aws_s3_bucket.logs.id
+}
+
+resource "aws_s3_bucket_notification" "audit_logs_notification" {
+  bucket = aws_s3_bucket.audit_logs.id
 }
