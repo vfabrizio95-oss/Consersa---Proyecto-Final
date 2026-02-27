@@ -61,6 +61,22 @@ resource "aws_cloudfront_distribution" "frontend" {
     response_page_path    = "/index.html"
     error_caching_min_ttl = 300
   }
+  
+  origin_group {
+    origin_id = "group1"
+      
+    failover_criteria {
+      status_codes = [500, 502, 503, 504]
+    }
+        
+    member {
+      origin_id = "origin1"
+    }
+      
+    member {
+      origin_id = "origin2"
+    }
+  }
 }
 
 resource "aws_s3_bucket" "logs" {
