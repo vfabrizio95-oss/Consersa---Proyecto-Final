@@ -2,7 +2,11 @@ resource "aws_vpc" "main" {
   cidr_block           = var.vpc_cidr
   enable_dns_hostnames = true
   enable_dns_support   = true
-  tags                 = { Name = "${local.prefix}-vpc" }
+
+  tags = {
+    Name        = "${local.prefix}-vpc"
+    Environment = var.environment
+  }
 }
 
 resource "aws_subnet" "private" {
@@ -10,7 +14,11 @@ resource "aws_subnet" "private" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = cidrsubnet(var.vpc_cidr, 8, count.index + 1)
   availability_zone = var.azs[count.index]
-  tags              = { Name = "${local.prefix}-subnet-private-${var.azs[count.index]}" }
+
+  tags = {
+    Name        = "${local.prefix}-subnet-private-${var.azs[count.index]}"
+    Environment = var.environment
+  }
 }
 
 resource "aws_subnet" "public" {
@@ -19,34 +27,56 @@ resource "aws_subnet" "public" {
   cidr_block              = cidrsubnet(var.vpc_cidr, 8, count.index + 10)
   availability_zone       = var.azs[count.index]
   map_public_ip_on_launch = true
-  tags                    = { Name = "${local.prefix}-subnet-public-${var.azs[count.index]}" }
+
+  tags = {
+    Name        = "${local.prefix}-subnet-public-${var.azs[count.index]}"
+    Environment = var.environment
+  }
 }
 
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.main.id
-  tags   = { Name = "${local.prefix}-igw" }
+
+  tags = {
+    Name        = "${local.prefix}-igw"
+    Environment = var.environment
+  }
 }
 
 resource "aws_eip" "nat" {
-  domain     = "vpc"
-  depends_on = [aws_internet_gateway.igw]
-  tags       = { Name = "${local.prefix}-nat-eip" }
+  domain = "vpc"
+
+  tags = {
+    Name        = "${local.prefix}-nat-eip"
+    Environment = var.environment
+  }
 }
 
 resource "aws_nat_gateway" "nat" {
   allocation_id = aws_eip.nat.id
   subnet_id     = aws_subnet.public[0].id
-  depends_on    = [aws_internet_gateway.igw]
-  tags          = { Name = "${local.prefix}-nat" }
+
+  tags = {
+    Name        = "${local.prefix}-nat"
+    Environment = var.environment
+  }
+
+  depends_on = [aws_internet_gateway.igw]
 }
 
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main.id
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.igw.id
+
+  tags = {
+    Name        = "${local.prefix}-rt-public"
+    Environment = var.environment
   }
-  tags = { Name = "${local.prefix}-rt-public" }
+}
+
+resource "aws_route" "public_internet_access" {
+  route_table_id         = aws_route_table.public.id
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id             = aws_internet_gateway.igw.id
 }
 
 resource "aws_route_table_association" "public" {
@@ -57,11 +87,17 @@ resource "aws_route_table_association" "public" {
 
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.main.id
-  route {
-    cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.nat.id
+
+  tags = {
+    Name        = "${local.prefix}-rt-private"
+    Environment = var.environment
   }
-  tags = { Name = "${local.prefix}-rt-private" }
+}
+
+resource "aws_route" "private_nat_access" {
+  route_table_id         = aws_route_table.private.id
+  destination_cidr_block = "0.0.0.0/0"
+  nat_gateway_id         = aws_nat_gateway.nat.id
 }
 
 resource "aws_route_table_association" "private" {
@@ -76,14 +112,17 @@ resource "aws_security_group" "lambda_sg" {
   vpc_id      = aws_vpc.main.id
 
   egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
+    description = "Allow HTTPS outbound only"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
-    description = "Allow all outbound"
   }
 
-  tags = { Name = "${local.prefix}-lambda-sg" }
+  tags = {
+    Name        = "${local.prefix}-lambda-sg"
+    Environment = var.environment
+  }
 }
 
 resource "aws_security_group" "endpoints_sg" {
@@ -92,21 +131,25 @@ resource "aws_security_group" "endpoints_sg" {
   vpc_id      = aws_vpc.main.id
 
   ingress {
+    description     = "HTTPS desde Lambdas"
     from_port       = 443
     to_port         = 443
     protocol        = "tcp"
     security_groups = [aws_security_group.lambda_sg.id]
-    description     = "HTTPS desde Lambdas"
   }
 
   egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
+    description = "Allow outbound HTTPS"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = { Name = "${local.prefix}-endpoints-sg" }
+  tags = {
+    Name        = "${local.prefix}-endpoints-sg"
+    Environment = var.environment
+  }
 }
 
 resource "aws_vpc_endpoint" "dynamodb" {
@@ -114,7 +157,11 @@ resource "aws_vpc_endpoint" "dynamodb" {
   service_name      = "com.amazonaws.${var.aws_region}.dynamodb"
   vpc_endpoint_type = "Gateway"
   route_table_ids   = [aws_route_table.private.id]
-  tags              = { Name = "${local.prefix}-vpce-dynamodb" }
+
+  tags = {
+    Name        = "${local.prefix}-vpce-dynamodb"
+    Environment = var.environment
+  }
 }
 
 resource "aws_vpc_endpoint" "s3" {
@@ -122,7 +169,11 @@ resource "aws_vpc_endpoint" "s3" {
   service_name      = "com.amazonaws.${var.aws_region}.s3"
   vpc_endpoint_type = "Gateway"
   route_table_ids   = [aws_route_table.private.id]
-  tags              = { Name = "${local.prefix}-vpce-s3" }
+
+  tags = {
+    Name        = "${local.prefix}-vpce-s3"
+    Environment = var.environment
+  }
 }
 
 resource "aws_vpc_endpoint" "sqs" {
@@ -132,7 +183,11 @@ resource "aws_vpc_endpoint" "sqs" {
   subnet_ids          = aws_subnet.private[*].id
   security_group_ids  = [aws_security_group.endpoints_sg.id]
   private_dns_enabled = true
-  tags                = { Name = "${local.prefix}-vpce-sqs" }
+
+  tags = {
+    Name        = "${local.prefix}-vpce-sqs"
+    Environment = var.environment
+  }
 }
 
 resource "aws_vpc_endpoint" "events" {
@@ -142,5 +197,9 @@ resource "aws_vpc_endpoint" "events" {
   subnet_ids          = aws_subnet.private[*].id
   security_group_ids  = [aws_security_group.endpoints_sg.id]
   private_dns_enabled = true
-  tags                = { Name = "${local.prefix}-vpce-events" }
+
+  tags = {
+    Name        = "${local.prefix}-vpce-events"
+    Environment = var.environment
+  }
 }
