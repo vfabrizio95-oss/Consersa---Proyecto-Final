@@ -9,6 +9,17 @@ resource "aws_vpc" "main" {
   }
 }
 
+resource "aws_default_security_group" "default" {
+  vpc_id = aws_vpc.main.id
+
+  ingress = []
+  egress  = []
+
+  tags = {
+    Name = "${local.prefix}-default-sg"
+  }
+}
+
 resource "aws_subnet" "private" {
   count             = length(var.azs)
   vpc_id            = aws_vpc.main.id

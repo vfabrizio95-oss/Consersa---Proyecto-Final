@@ -7,14 +7,14 @@ resource "aws_lambda_function" "pdf_processing" {
   timeout          = 120
   memory_size      = 1024
   source_code_hash = data.archive_file.placeholder.output_base64sha256
-  
-  kms_key_arn = aws_kms_key.main.arn
+
+  kms_key_arn                    = aws_kms_key.main.arn
   reserved_concurrent_executions = 10
-  code_signing_config_arn = aws_lambda_code_signing_config.main.arn
+  code_signing_config_arn        = aws_lambda_code_signing_config.main.arn
 
   dead_letter_config {
     target_arn = aws_sqs_queue.ordenes_dlq.arn
-}
+  }
 
   vpc_config {
     subnet_ids         = aws_subnet.private[*].id

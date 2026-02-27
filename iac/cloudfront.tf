@@ -4,7 +4,7 @@ resource "aws_cloudfront_distribution" "frontend" {
   default_root_object = "index.html"
   comment             = "${local.prefix} frontend"
   price_class         = "PriceClass_100"
-  web_acl_id = aws_wafv2_web_acl.api.arn
+  web_acl_id          = aws_wafv2_web_acl.api.arn
 
   origin {
     domain_name              = aws_s3_bucket.frontend.bucket_regional_domain_name
@@ -13,14 +13,14 @@ resource "aws_cloudfront_distribution" "frontend" {
   }
 
   default_cache_behavior {
-    allowed_methods        = ["GET", "HEAD", "OPTIONS"]
-    cached_methods         = ["GET", "HEAD"]
-    target_origin_id       = "S3-${aws_s3_bucket.frontend.id}"
-    viewer_protocol_policy = "redirect-to-https"
-    compress               = true
-    min_ttl                = 0
-    default_ttl            = 3600
-    max_ttl                = 86400
+    allowed_methods            = ["GET", "HEAD", "OPTIONS"]
+    cached_methods             = ["GET", "HEAD"]
+    target_origin_id           = "S3-${aws_s3_bucket.frontend.id}"
+    viewer_protocol_policy     = "redirect-to-https"
+    compress                   = true
+    min_ttl                    = 0
+    default_ttl                = 3600
+    max_ttl                    = 86400
     response_headers_policy_id = aws_cloudfront_response_headers_policy.security_headers.id
 
     forwarded_values {
@@ -45,16 +45,14 @@ resource "aws_cloudfront_distribution" "frontend" {
   }
 
   viewer_certificate {
-  acm_certificate_arn      = aws_acm_certificate.cert.arn
-  ssl_support_method       = "sni-only"
-  minimum_protocol_version = "TLSv1.2_2021"
-}
+    cloudfront_default_certificate = true
+  }
 
   logging_config {
     include_cookies = false
     bucket          = aws_s3_bucket.logs.bucket_domain_name
     prefix          = "cloudfront/"
-}
+  }
 
   custom_error_response {
     error_code            = 404
@@ -82,26 +80,26 @@ resource "aws_cloudfront_response_headers_policy" "security_headers" {
   security_headers_config {
     content_type_options {
       override = true
-      }
+    }
     frame_options {
       frame_option = "DENY"
-      override = true
-      }
+      override     = true
+    }
     referrer_policy {
       referrer_policy = "strict-origin-when-cross-origin"
-      override = true
-      }
+      override        = true
+    }
     xss_protection {
       protection = true
       mode_block = true
-      override = true
-      }
+      override   = true
+    }
 
     strict_transport_security {
       access_control_max_age_sec = 63072000
-      include_subdomains = true
-      preload = true
-      override = true
+      include_subdomains         = true
+      preload                    = true
+      override                   = true
     }
   }
 }

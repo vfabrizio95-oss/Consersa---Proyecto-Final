@@ -1,4 +1,3 @@
-data "aws_caller_identity" "current" {}
 resource "aws_iam_role" "lambda" {
   name = "${local.prefix}-lambda-role"
 
@@ -113,7 +112,7 @@ resource "aws_iam_role_policy" "lambda_custom" {
 }
 
 resource "aws_signer_signing_profile" "lambda" {
-  name_prefix = "${local.prefix}-lambda-signing"
+  name_prefix = "consersalambda"
   platform_id = "AWSLambda-SHA384-ECDSA"
 }
 

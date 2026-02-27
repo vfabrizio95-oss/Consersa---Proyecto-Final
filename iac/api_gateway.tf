@@ -224,7 +224,7 @@ resource "aws_wafv2_web_acl" "api" {
     }
   }
 
-    rule {
+  rule {
     name     = "KnownBadInputs"
     priority = 3
 
