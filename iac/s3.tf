@@ -44,6 +44,9 @@ resource "aws_s3_bucket_lifecycle_configuration" "pdfs" {
       days          = 365
       storage_class = "GLACIER"
     }
+    abort_incomplete_multipart_upload {
+    days_after_initiation = 7
+    }
   }
 }
 resource "aws_s3_bucket" "frontend" {
