@@ -54,6 +54,17 @@ resource "aws_sqs_queue" "ordenes_dlq" {
   }
 }
 
+resource "aws_sqs_queue" "lambda_dlq" {
+  name = "${local.prefix}-lambda-dlq"
+
+  message_retention_seconds = 1209600
+  kms_master_key_id         = aws_kms_key.main.id
+
+  tags = {
+    Name = "${local.prefix}-lambda-dlq"
+  }
+}
+
 resource "aws_sqs_queue_policy" "valorizaciones_policy" {
   queue_url = aws_sqs_queue.valorizaciones.url
 

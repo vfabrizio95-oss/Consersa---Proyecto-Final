@@ -1,8 +1,15 @@
 resource "aws_s3_bucket" "pdfs" {
   bucket = lower("${local.prefix}-pdfs")
+
   tags = {
     Name = "${local.prefix}-pdfs"
   }
+}
+
+resource "aws_s3_bucket_logging" "pdfs" {
+  bucket        = aws_s3_bucket.pdfs.id
+  target_bucket = aws_s3_bucket.logs.id
+  target_prefix = "pdfs/"
 }
 
 resource "aws_s3_bucket_versioning" "pdfs" {
@@ -44,13 +51,23 @@ resource "aws_s3_bucket_lifecycle_configuration" "pdfs" {
       days          = 365
       storage_class = "GLACIER"
     }
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 7
+    }
   }
 }
 resource "aws_s3_bucket" "frontend" {
   bucket = "${local.prefix}-frontend"
+
   tags = {
     Name = "${local.prefix}-frontend"
   }
+}
+
+resource "aws_s3_bucket_logging" "frontend" {
+  bucket        = aws_s3_bucket.frontend.id
+  target_bucket = aws_s3_bucket.logs.id
+  target_prefix = "frontend/"
 }
 
 resource "aws_s3_bucket_versioning" "frontend" {
@@ -64,7 +81,8 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "frontend" {
   bucket = aws_s3_bucket.frontend.id
   rule {
     apply_server_side_encryption_by_default {
-      sse_algorithm = "AES256"
+      sse_algorithm     = "aws:kms"
+      kms_master_key_id = aws_kms_key.main.arn
     }
   }
 }
@@ -92,4 +110,17 @@ resource "aws_s3_bucket_policy" "frontend" {
       }
     }]
   })
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "frontend" {
+  bucket = aws_s3_bucket.frontend.id
+
+  rule {
+    id     = "cleanup-frontend"
+    status = "Enabled"
+
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 7
+    }
+  }
 }

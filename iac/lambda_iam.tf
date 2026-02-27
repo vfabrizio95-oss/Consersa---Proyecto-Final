@@ -79,7 +79,8 @@ resource "aws_iam_role_policy" "lambda_custom" {
         ]
         Resource = [
           aws_sqs_queue.valorizaciones.arn,
-          aws_sqs_queue.ordenes.arn
+          aws_sqs_queue.ordenes.arn,
+          aws_sqs_queue.lambda_dlq.arn
         ]
       },
       {
@@ -105,10 +106,27 @@ resource "aws_iam_role_policy" "lambda_custom" {
           "ses:SendEmail",
           "ses:SendRawEmail"
         ]
-        Resource = "*"
+        Resource = "arn:aws:ses:${var.aws_region}:${data.aws_caller_identity.current.account_id}:identity/*"
       }
     ]
   })
+}
+
+resource "aws_signer_signing_profile" "lambda" {
+  name_prefix = "consersalambda"
+  platform_id = "AWSLambda-SHA384-ECDSA"
+}
+
+resource "aws_lambda_code_signing_config" "main" {
+  allowed_publishers {
+    signing_profile_version_arns = [
+      aws_signer_signing_profile.lambda.version_arn
+    ]
+  }
+
+  policies {
+    untrusted_artifact_on_deployment = "Enforce"
+  }
 }
 
 data "archive_file" "placeholder" {

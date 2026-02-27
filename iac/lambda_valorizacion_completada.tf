@@ -8,6 +8,12 @@ resource "aws_lambda_function" "valorizacion_completada" {
   memory_size      = 512
   source_code_hash = data.archive_file.placeholder.output_base64sha256
 
+  kms_key_arn                    = aws_kms_key.main.arn
+
+  dead_letter_config {
+    target_arn = aws_sqs_queue.lambda_dlq.arn
+  }
+
   vpc_config {
     subnet_ids         = aws_subnet.private[*].id
     security_group_ids = [aws_security_group.lambda_sg.id]

@@ -92,6 +92,8 @@ terraform apply
 ```
 Y confirmamos con yes
 
+7. Confirmamos la suscribcion que nos llegara en notificacin al gmail puesto en alarm_email
+
 7. Al ser un dominio comprado en namecheap necesitaremos los Nameservers que se ven algo asi
 ```
 ns-xxxx.awsdns-xx.org

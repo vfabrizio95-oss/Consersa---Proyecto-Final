@@ -8,6 +8,12 @@ resource "aws_lambda_function" "consultar_ordenes" {
   memory_size      = 256
   source_code_hash = data.archive_file.placeholder.output_base64sha256
 
+  kms_key_arn                    = aws_kms_key.main.arn
+
+  dead_letter_config {
+    target_arn = aws_sqs_queue.lambda_dlq.arn
+  }
+
   vpc_config {
     subnet_ids         = aws_subnet.private[*].id
     security_group_ids = [aws_security_group.lambda_sg.id]
@@ -31,5 +37,5 @@ resource "aws_lambda_permission" "api_gateway_consultar" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.consultar_ordenes.function_name
   principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_api_gateway_rest_api.main.execution_arn}//"
+  source_arn    = "${aws_api_gateway_rest_api.main.execution_arn}/*/*"
 }
