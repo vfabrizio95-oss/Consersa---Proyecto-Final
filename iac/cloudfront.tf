@@ -48,12 +48,22 @@ resource "aws_cloudfront_distribution" "frontend" {
   minimum_protocol_version = "TLSv1.2_2021"
 }
 
+  logging_config {
+    include_cookies = false
+    bucket          = aws_s3_bucket.logs.bucket_domain_name
+    prefix          = "cloudfront/"
+}
+
   custom_error_response {
     error_code            = 404
     response_code         = 200
     response_page_path    = "/index.html"
     error_caching_min_ttl = 300
   }
+}
+
+resource "aws_s3_bucket" "logs" {
+  bucket = "${local.prefix}-cloudfront-logs"
 }
 
 resource "aws_cloudfront_origin_access_control" "frontend" {
