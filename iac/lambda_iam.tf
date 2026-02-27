@@ -111,6 +111,23 @@ resource "aws_iam_role_policy" "lambda_custom" {
   })
 }
 
+resource "aws_signer_signing_profile" "lambda" {
+  name_prefix = "${local.prefix}-lambda-signing"
+  platform_id = "AWSLambda-SHA384-ECDSA"
+}
+
+resource "aws_lambda_code_signing_config" "main" {
+  allowed_publishers {
+    signing_profile_version_arns = [
+      aws_signer_signing_profile.lambda.version_arn
+    ]
+  }
+
+  policies {
+    untrusted_artifact_on_deployment = "Enforce"
+  }
+}
+
 data "archive_file" "placeholder" {
   type        = "zip"
   output_path = "/tmp/lambda_placeholder.zip"
