@@ -66,6 +66,21 @@ resource "aws_s3_bucket" "logs" {
   bucket = "${local.prefix}-cloudfront-logs"
 }
 
+resource "aws_s3_bucket_versioning" "logs" {
+  bucket = aws_s3_bucket.logs.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_public_access_block" "logs" {
+  bucket                  = aws_s3_bucket.logs.id
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
 resource "aws_cloudfront_origin_access_control" "frontend" {
   name                              = "${local.prefix}-frontend-oac"
   description                       = "OAC para S3 frontend"
