@@ -1,3 +1,4 @@
+data "aws_caller_identity" "current" {}
 resource "aws_iam_role" "lambda" {
   name = "${local.prefix}-lambda-role"
 
@@ -105,7 +106,7 @@ resource "aws_iam_role_policy" "lambda_custom" {
           "ses:SendEmail",
           "ses:SendRawEmail"
         ]
-        Resource = "*"
+        Resource = "arn:aws:ses:${var.aws_region}:${data.aws_caller_identity.current.account_id}:identity/*"
       }
     ]
   })
